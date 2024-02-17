@@ -147,7 +147,10 @@ def remove_entry_boxes():
         for widget in last_row:
             widget.destroy()
 
-        Answer.destroy()
+        # removing Answer
+        if Answer:
+            Answer.destroy()
+            
         # Move both "Add Entry Boxes" and "Remove Entry Box" buttons to the previous row
         row_count -= 1
         add_button.grid(row=row_count, column=2, padx=5, pady=10)
