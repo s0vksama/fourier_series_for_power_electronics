@@ -47,6 +47,7 @@ def add_function_button_clicked():
         b1.grid(row=1, column=2)
 
     e1 = CTkEntry(master = root)
+    e1.insert(END, 'f(t)')
     e1.grid(row = row_count, column =0)
 
     e2 = CTkEntry(master = root)
