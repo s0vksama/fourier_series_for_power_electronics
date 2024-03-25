@@ -1,29 +1,30 @@
-import tkinter as tk
-import sympy as sym
-from sympy import symbols, sympify
-from tkinter import ttk
+import tkinter
+from customtkinter import*
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from sympy import symbols, sympify
+import sympy as sym
 import math
 import numpy as np
-import re
 
 from sympy import pi
-x_labelsPi = ['-T', '-3T/4', '-T/2', '-T/4', '0', 'T/4', 'T/2', '3T/4']
 
-Answer = None
+furrbtn = None
+fig1 = None
+
+root = CTk()
+root.geometry("500X400")
+
 def graph_graphics():
     # Customize the grid color with a custom RGB value
     grid_color = (0.4275, 0.4275, 0.4118)  # RGB values between 0 and 1
-    fig.set_facecolor('#2D2C39')  # Set the background color to a light gray
+    fig.set_facecolor('#242424')  # Set the background color to a light gray
     # Customize the background color of the graph
-    ax.set_facecolor('#2D2C39')
+    ax.set_facecolor('#242424')
     plt.grid(color=grid_color, linestyle='--', linewidth=0.5)
     plt.axhline(y=0, color='white', linestyle='-', linewidth=2)
-    plt.axvline(x=2 * pi, color=grid_color, linestyle='--', linewidth=1)
-    plt.axvline(x=-2 * pi, color=grid_color, linestyle='--', linewidth=1)
     plt.axvline(x=0, color='white', linestyle='-', linewidth=2)
-    plt.xticks(np.arange(-2 * pi, 2 * pi, pi / 2), labels=x_labelsPi)
+
     # Customize axis and label colors
     ax.tick_params(axis='both', which='both', colors='white')  # Change axis tick color
     ax.spines['bottom'].set_color('white')  # Change color of the x-axis
@@ -33,60 +34,77 @@ def graph_graphics():
     ax.xaxis.label.set_color('white')  # Change color of the x-axis label
     ax.yaxis.label.set_color('white')  # Change color of the y-axis label
 
-def add_entry_boxes():
+def add_function_button_clicked():
     global row_count
-    global Answer
-    if Answer:
-        Answer.destroy()
 
-    entry1 = tk.Entry(root)
-    entry2 = tk.Entry(root)
-    entry3 = tk.Entry(root)
-    extra_button = ttk.Button(root, text="Plot", command=lambda: on_extra_button_click(entry1.get(), entry2.get(), entry3.get()))
+    row_count+=1
+    if row_count ==2:
+        global deltbtn
+        deltbtn = CTkButton(master = root, text = "delete interval", command=delete_function_button_clicked)
+        deltbtn.grid(row=1, column=1)
+        global b1
+        b1 = CTkButton(master = root, text = "Plot", command = plot_graph)
+        b1.grid(row=1, column=2)
 
-    entry1.grid(row=row_count, column=2, padx=5, pady=5)
-    entry2.grid(row=row_count, column=3, padx=5, pady=5, sticky='w')
-    entry3.grid(row=row_count, column=3, padx=140, pady=5, sticky='w')
-    extra_button.grid(row=row_count, column=3, padx=270, pady=5, sticky='w')
+    e1 = CTkEntry(master = root)
+    e1.grid(row = row_count, column =0)
 
-    entry_boxes.append((entry1, entry2, entry3, extra_button))
+    e2 = CTkEntry(master = root)
+    e2.grid(row = row_count, column =1)
 
-    # Move the "Remove Entry Box" button to the end of the row
-    remove_button.grid(row=row_count, column=4, padx=300, pady=5, sticky='w')
+    l1 =CTkLabel(master = root, text="<  t  <", font=("Helvetica", 25))
+    l1.grid(row= row_count, column=2)
 
-    # Increment row_count for the next set of entry boxes
-    row_count += 1
+    e3 = CTkEntry(master = root)
+    e3.grid(row = row_count, column =3)
 
-    # Move both "Add Entry Boxes" and "Remove Entry Box" buttons to the next row
-    add_button.grid(row=row_count, column=2, padx=5, pady=10)
-    remove_button.grid(row=row_count, column=3, padx=5, pady=10, sticky='w')
+    entry_boxes.append((e1, e2, l1, e3))
 
-    # Create a new "Get Entry Values" button each time entry boxes are added
-    get_values_button.grid(row=row_count, column=3, padx=150, pady=10, sticky='w')
+def delete_function_button_clicked():
+    global row_count
+    global deltbtn
+    global fig1
+    global canvas1
 
-def get_entry_values():
-    # Extract the values from all entry boxes
-    global Answer
+    if entry_boxes:
+        last_row = entry_boxes.pop()
+        for widget in last_row:
+            widget.destroy()
+        row_count-=1
+
+    if row_count == 1:
+        deltbtn.destroy()
+        b1.destroy()
+
+    if furrbtn:
+        furrbtn.destroy()
+
+    if fig1:
+        canvas1.get_tk_widget().destroy()
+        plt.close(fig1)
+
+def plot_graph():
+    global all_values
+    global my_function
+    global max_value
+    global min_value
+    global furrbtn
+
     all_values = []
-    T = symbols("T")
-    for entry1, entry2, entry3, _ in entry_boxes:
+    max_value = -99999
+    min_value = 99999
+
+    for entry1, entry2, _, entry3 in entry_boxes:
         value1 = entry1.get()
         value2 = entry2.get()
+        if float(value2) < min_value:
+            min_value = float(value2)
+
         value3 = entry3.get()
+        if float(value3) > max_value:
+            max_value = float(value3)
 
-        try:
-            expr = sympify(value2)
-            st = str(expr.subs(T, 2*pi))
-            expr = sympify(value3)
-            en = str(expr.subs(T, 2*pi))
-
-        except Exception as e:
-            # print(f"Error: {e}")
-            pass
-
-        condition_str = "((t>="+st+")&(t<="+en+"))"
-
-        t = symbols('t')
+        condition_str = "((t>="+value2+")&(t<="+value3+"))"
         expression = sympify(value1)
         condition_str = sympify(condition_str)
         all_values.append((expression, condition_str))
@@ -96,97 +114,71 @@ def get_entry_values():
     else:
         my_function = all_values[0][0]
 
-    ser = sym.fourier_series(my_function, (t, 0, 2*pi))
-    z = ser.truncate(5)
-    # print(z)
-    larger_font = ("Helvetica", 16)
-
-    if Answer:
-        Answer.destroy()
-
-    Answer = tk.Label(root, text=str(z), font=larger_font)
-    Answer.grid(row=row_count+1, column=0, columnspan=4, padx=5, pady=10)
-    Answer.configure(bg='#2D2C39', fg='white')
-
-# ploting graph and data manupulation function
-def on_extra_button_click(expression_str, a, b):
-    T = symbols("T")
-    try:
-        expr = sympify(a)
-        st = float(expr.subs(T, 2*pi))
-        expr = sympify(b)
-        en = float(expr.subs(T, 2*pi))
-
-    except Exception as e:
-        # print(f"Error: {e}")
-        pass
-
-    try:
-        x = symbols('t')
-        expression = sympify(expression_str)
-        # Generate x values
-        x_values = np.linspace(st, en, 500)
-        # Evaluate the expression for each x value
-        y_values = [expression.subs(x, val) for val in x_values]
-
-        # Plot the expression
-        line = ax.plot(x_values, y_values, label=str(expression))
-        cr = line[0].get_color()
-        # sifted function
-        ax.plot(x_values-2*pi, y_values, label=str(expression), color = cr)
-        # Display the updated plot
-        canvas.draw()
-    except Exception as e:
-        # print("Error:", e)
-        pass
-
-def remove_entry_boxes():
-    global row_count  # Declare row_count as global
-    if entry_boxes:
-        last_row = entry_boxes.pop()
-        for widget in last_row:
-            widget.destroy()
-
-        # removing Answer
-        if Answer:
-            Answer.destroy()
-            
-        # Move both "Add Entry Boxes" and "Remove Entry Box" buttons to the previous row
-        row_count -= 1
-        add_button.grid(row=row_count, column=2, padx=5, pady=10)
-        remove_button.grid(row=row_count, column=3, padx=5, pady=10)
-
-        # Create a new "Get Entry Values" button each time entry boxes are added
-        get_values_button.grid(row=row_count, column=3, padx=150, pady=10)
-
-    # clear the previous graph
-    ax.cla()
-    plt.draw()
+    t = sym.symbols('t')
+    # clearing the graph
+    ax.clear()
     graph_graphics()
 
-root = tk.Tk()
-root.title("Fourier Transform")
-root.configure(bg='#2D2C39')
+    # to plot the graph we need the x values and y values:
+    # getting x values
+    x_values = np.linspace(min_value, max_value, 100)
 
-style = ttk.Style()
-# style.theme_use('clam')
-style.configure("TButton", foreground="black", background="white")  # Configure TButton widget
+    # getting y values
+    y_values = [my_function.subs(t, val) for val in x_values]
 
+    cr = "#E18528"
+    line = ax.plot(x_values, y_values, color = cr, linewidth=2.5)
+
+    # shifting function
+    shift = max_value - min_value
+    ax.plot(x_values-(max_value-min_value), y_values, color = cr, linewidth=2.5)
+    ax.plot(x_values+(max_value-min_value), y_values, color = cr, linewidth=2.5)
+
+    # Connect the -shift graph to the start of the original graph
+    ax.plot([x_values[0], x_values[-1] - shift], [y_values[-1], y_values[0]], color=cr, linewidth=2.5)
+
+    # Connect the end of the original graph to the +shift graph
+    ax.plot([x_values[-1], x_values[0] + shift], [y_values[-1], y_values[0]], color=cr, linewidth=2.5)
+
+    canvas.draw()
+    # appearing fourier button
+    furrbtn = CTkButton(master = root, text = "Fourier Series", command=fourier_clicked, fg_color=("#de8202", "#de8202") )
+    furrbtn.grid(row=1, column=3, pady=10)
+
+def fourier_clicked():
+    global fig1
+    global canvas1
+    t = sym.symbols('t')
+    ser = sym.fourier_series(my_function, (t, min_value, max_value))
+
+    # Convert coefficients to fractions
+    ser_frac = ser.truncate(5).rewrite(sym.cos).rewrite(sym.sin)
+    ser_frac = sym.nsimplify(ser_frac)
+    len_ser_frac = len(str(ser_frac))
+
+    # Convert the Fourier series expression to a LaTeX string
+    latex_eqn = sym.latex(ser_frac)
+
+    # Add the LaTeX equation as text on the plot
+    fig1, ax1 = plt.subplots(figsize=(11, 1))
+    ax1.axis('off')
+    fig1.set_facecolor('#242424')
+    canvas1 = FigureCanvasTkAgg(fig1, master=root)
+    canvas1.get_tk_widget().grid(row=row_count+1, column=0, columnspan=4, pady = 50, padx=50)
+
+    equation_text = f'Fourier Series:\n${latex_eqn}$'
+    ax1.text(-0.1, 0.2, equation_text, horizontalalignment='left', verticalalignment='top', transform=ax.transAxes, fontsize=12, color='white')
 
 #Graph graphics
-fig, ax =plt.subplots(figsize=(11,3))
+fig, ax = plt.subplots(figsize=(11,3))
 canvas = FigureCanvasTkAgg(fig, master=root)
-canvas.get_tk_widget().grid(row=0, column=0, columnspan=4)
+canvas.get_tk_widget().grid(row=0, column=0, columnspan=4, pady = 50, padx=50)
 graph_graphics()
 
-# The buttons
+# root.grid_columnconfigure(1, minsize=100)
+row_count = 1;
 entry_boxes = []
-row_count = 1
-
-add_button = ttk.Button(root, text="Add Function", command=add_entry_boxes)
-add_button.grid(row=row_count, column=2, padx=5, pady=10)
-
-remove_button = ttk.Button(root, text="Remove Function", command=remove_entry_boxes)
-get_values_button = ttk.Button(root, text="Fourier Transform", command=get_entry_values)
+addbtn = CTkButton(master = root, text = "add interval", command=add_function_button_clicked)
+addbtn.grid(row=1, column=0, pady=10)
 
 root.mainloop()
