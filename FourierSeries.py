@@ -170,6 +170,7 @@ def fourier_clicked():
     equation_text = f'Fourier Series:\n${latex_eqn}$'
     ax1.text(-0.1, 0.2, equation_text, horizontalalignment='left', verticalalignment='top', transform=ax.transAxes, fontsize=12, color='white')
 
+set_appearance_mode("Dark")
 #Graph graphics
 fig, ax = plt.subplots(figsize=(11,3))
 canvas = FigureCanvasTkAgg(fig, master=root)
