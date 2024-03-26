@@ -83,6 +83,9 @@ def delete_function_button_clicked():
     if fig1:
         canvas1.get_tk_widget().destroy()
         plt.close(fig1)
+    ax.clear()
+    graph_graphics()
+    canvas.draw()
 
 def plot_graph():
     global all_values
