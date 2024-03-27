@@ -14,6 +14,7 @@ fig1 = None
 
 root = CTk()
 root.geometry("500X400")
+grid_color = (0.4275, 0.4275, 0.4118)
 
 def graph_graphics():
     # Customize the grid color with a custom RGB value
@@ -81,12 +82,18 @@ def delete_function_button_clicked():
     if furrbtn:
         furrbtn.destroy()
 
-    ax.clear()
-    graph_graphics()
-    canvas.draw()
+    if fig1:
+        canvas1.get_tk_widget().destroy()
+        plt.close(fig1)
 
     if my_frame:
         my_frame.grid_forget()
+        my_frame.destroy()
+        my_frame = None
+
+    ax.clear()
+    graph_graphics()
+    canvas.draw()
 
 def plot_graph():
     global all_values
@@ -124,7 +131,7 @@ def plot_graph():
     t = sym.symbols('t')
     # clearing the graph
     ax.clear()
-
+    graph_graphics()
 
     # to plot the graph we need the x values and y values:
     # getting x values
@@ -135,6 +142,11 @@ def plot_graph():
 
     cr = "#E18528"
     line = ax.plot(x_values, y_values, color = cr, linewidth=2.5)
+
+    # plotting ticks and axies
+    plt.grid(color=grid_color, linestyle='--', linewidth=0.5)
+    plt.axhline(y=0, color='white', linestyle='-', linewidth=2)
+    plt.axvline(x=0, color='white', linestyle='-', linewidth=2)
 
     # shifting function
     shift = max_value - min_value
@@ -147,7 +159,6 @@ def plot_graph():
     # Connect the end of the original graph to the +shift graph
     ax.plot([x_values[-1], x_values[0] + shift], [y_values[-1], y_values[0]], color=cr, linewidth=2.5)
 
-    graph_graphics()
     canvas.draw()
     # appearing fourier button
     furrbtn = CTkButton(master = root, text = "Fourier Series", command=fourier_clicked, fg_color=("#de8202", "#de8202") )
@@ -164,26 +175,27 @@ def fourier_clicked():
     ser_frac = ser.truncate(5).rewrite(sym.cos).rewrite(sym.sin)
     ser_frac = sym.nsimplify(ser_frac)
     len_ser_frac = len(str(ser_frac))
+    len_ser_frac = max(len_ser_frac/15, 9)
 
     # Convert the Fourier series expression to a LaTeX string
     latex_eqn = sym.latex(ser_frac)
 
     # creatign a frame to scroll
-    my_frame = CTkScrollableFrame(root, orientation="horizontal", width = 700, height = 200,)
-    my_frame.grid(row=row_count+1, column=0, columnspan=11, pady = 50, padx=50)
+    my_frame = CTkScrollableFrame(root, orientation="horizontal", width = 700, height = 100,)
+    my_frame.grid(row=row_count+1, column=0, columnspan=11, pady = 10, padx=0)
 
     # Add the LaTeX equation as text on the plot
-    fig1, ax1 = plt.subplots(figsize=(25, 1.5))
+    fig1, ax1 = plt.subplots(figsize=(len_ser_frac, 1.2))
     ax1.axis('off')
     fig1.set_facecolor('#242424')
     fig1.tight_layout()
     canvas1 = FigureCanvasTkAgg(fig1, master=my_frame)
-    canvas1.get_tk_widget().grid(row=row_count+1, column=0, columnspan=4, pady = 50, padx=50)
-
-    equation_text = f'${latex_eqn}$'
-    ax1.text(-0.1, 0.2, equation_text, horizontalalignment='left', verticalalignment='top', transform=ax.transAxes, fontsize=17, color='white')
+    canvas1.get_tk_widget().grid(row=row_count+1, column=0, columnspan=4, pady = 0, padx=0, sticky="ew")
+    equation_text = f'Fourier Series\n${latex_eqn}$'
+    ax1.text(-0.1, 0.3, equation_text, horizontalalignment='left', verticalalignment='top', transform=ax.transAxes, fontsize=17, color='white', weight="bold")
 
 set_appearance_mode("Dark")
+root.title("Fourier Feries For Power Electronics")
 #Graph graphics
 fig, ax = plt.subplots(figsize=(11,3))
 canvas = FigureCanvasTkAgg(fig, master=root)
