@@ -66,6 +66,7 @@ def delete_function_button_clicked():
     global deltbtn
     global fig1
     global canvas1
+    global my_frame
 
     if entry_boxes:
         last_row = entry_boxes.pop()
@@ -80,12 +81,12 @@ def delete_function_button_clicked():
     if furrbtn:
         furrbtn.destroy()
 
-    if fig1:
-        canvas1.get_tk_widget().destroy()
-        plt.close(fig1)
     ax.clear()
     graph_graphics()
     canvas.draw()
+
+    if my_frame:
+        my_frame.grid_forget()
 
 def plot_graph():
     global all_values
@@ -93,6 +94,8 @@ def plot_graph():
     global max_value
     global min_value
     global furrbtn
+    global ax
+    global fig
 
     all_values = []
     max_value = -99999
@@ -121,7 +124,7 @@ def plot_graph():
     t = sym.symbols('t')
     # clearing the graph
     ax.clear()
-    graph_graphics()
+
 
     # to plot the graph we need the x values and y values:
     # getting x values
@@ -144,6 +147,7 @@ def plot_graph():
     # Connect the end of the original graph to the +shift graph
     ax.plot([x_values[-1], x_values[0] + shift], [y_values[-1], y_values[0]], color=cr, linewidth=2.5)
 
+    graph_graphics()
     canvas.draw()
     # appearing fourier button
     furrbtn = CTkButton(master = root, text = "Fourier Series", command=fourier_clicked, fg_color=("#de8202", "#de8202") )
@@ -152,6 +156,7 @@ def plot_graph():
 def fourier_clicked():
     global fig1
     global canvas1
+    global my_frame
     t = sym.symbols('t')
     ser = sym.fourier_series(my_function, (t, min_value, max_value))
 
@@ -163,15 +168,20 @@ def fourier_clicked():
     # Convert the Fourier series expression to a LaTeX string
     latex_eqn = sym.latex(ser_frac)
 
+    # creatign a frame to scroll
+    my_frame = CTkScrollableFrame(root, orientation="horizontal", width = 700, height = 200,)
+    my_frame.grid(row=row_count+1, column=0, columnspan=11, pady = 50, padx=50)
+
     # Add the LaTeX equation as text on the plot
-    fig1, ax1 = plt.subplots(figsize=(11, 1))
+    fig1, ax1 = plt.subplots(figsize=(25, 1.5))
     ax1.axis('off')
     fig1.set_facecolor('#242424')
-    canvas1 = FigureCanvasTkAgg(fig1, master=root)
+    fig1.tight_layout()
+    canvas1 = FigureCanvasTkAgg(fig1, master=my_frame)
     canvas1.get_tk_widget().grid(row=row_count+1, column=0, columnspan=4, pady = 50, padx=50)
 
-    equation_text = f'Fourier Series:\n${latex_eqn}$'
-    ax1.text(-0.1, 0.2, equation_text, horizontalalignment='left', verticalalignment='top', transform=ax.transAxes, fontsize=12, color='white')
+    equation_text = f'${latex_eqn}$'
+    ax1.text(-0.1, 0.2, equation_text, horizontalalignment='left', verticalalignment='top', transform=ax.transAxes, fontsize=17, color='white')
 
 set_appearance_mode("Dark")
 #Graph graphics
