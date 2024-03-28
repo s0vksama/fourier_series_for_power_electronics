@@ -104,6 +104,8 @@ def plot_graph():
     global ax
     global fig
 
+    T = symbols("pi")
+
     all_values = []
     max_value = -99999
     min_value = 99999
@@ -111,14 +113,26 @@ def plot_graph():
     for entry1, entry2, _, entry3 in entry_boxes:
         value1 = entry1.get()
         value2 = entry2.get()
-        if float(value2) < min_value:
-            min_value = float(value2)
-
         value3 = entry3.get()
-        if float(value3) > max_value:
-            max_value = float(value3)
 
-        condition_str = "((t>="+value2+")&(t<="+value3+"))"
+        try:
+            value2 = sympify(value2)
+            value3 = sympify(value3)
+
+            value2 = value2.subs(T, pi)
+            value3 = value3.subs(T, pi)
+
+        except Exception as e:
+            print(f"Error: {e}")
+            pass
+
+        if float(value2) < min_value:
+            min_value = value2
+
+        if float(value3) > max_value:
+            max_value = value3
+
+        condition_str = "((t>="+str(value2)+")&(t<="+str(value3)+"))"
         expression = sympify(value1)
         condition_str = sympify(condition_str)
         all_values.append((expression, condition_str))
@@ -135,7 +149,7 @@ def plot_graph():
 
     # to plot the graph we need the x values and y values:
     # getting x values
-    x_values = np.linspace(min_value, max_value, 100)
+    x_values = np.linspace(float(min_value), float(max_value), 100)
 
     # getting y values
     y_values = [my_function.subs(t, val) for val in x_values]
@@ -172,7 +186,7 @@ def fourier_clicked():
     ser = sym.fourier_series(my_function, (t, min_value, max_value))
 
     # Convert coefficients to fractions
-    ser_frac = ser.truncate(5).rewrite(sym.cos).rewrite(sym.sin)
+    ser_frac = ser.truncate(5)
     ser_frac = sym.nsimplify(ser_frac)
     len_ser_frac = len(str(ser_frac))
     len_ser_frac = max(len_ser_frac/15, 9)
