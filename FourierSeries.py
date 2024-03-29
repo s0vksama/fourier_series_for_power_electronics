@@ -1,4 +1,4 @@
-import tkinter
+import tkinter as tk
 from customtkinter import*
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -91,6 +91,12 @@ def delete_function_button_clicked():
         my_frame.destroy()
         my_frame = None
 
+    # enables buttons
+    addbtn.configure(state=tk.NORMAL)
+
+    if row_count !=1:
+        b1.configure(state=tk.NORMAL)
+
     ax.clear()
     graph_graphics()
     canvas.draw()
@@ -180,6 +186,12 @@ def fourier_clicked():
     global fig1
     global canvas1
     global my_frame
+
+    # disableing buttons
+    addbtn.configure(state=tk.DISABLED)
+    b1.configure(state=tk.DISABLED)
+    furrbtn.configure(state=tk.DISABLED)
+
     t = sym.symbols('t')
     ser = sym.fourier_series(my_function, (t, min_value, max_value))
 
