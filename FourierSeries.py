@@ -145,6 +145,7 @@ def plot_graph():
     t = sym.symbols('t')
     # clearing the graph
     ax.clear()
+
     graph_graphics()
 
     # to plot the graph we need the x values and y values:
@@ -155,24 +156,21 @@ def plot_graph():
     y_values = [my_function.subs(t, val) for val in x_values]
 
     cr = "#E18528"
-    line = ax.plot(x_values, y_values, color = cr, linewidth=2.5)
-
-    # plotting ticks and axies
-    plt.grid(color=grid_color, linestyle='--', linewidth=0.5)
-    plt.axhline(y=0, color='white', linestyle='-', linewidth=2)
-    plt.axvline(x=0, color='white', linestyle='-', linewidth=2)
+    line = ax.plot(x_values, y_values, color = cr, linewidth=4)
 
     # shifting function
     shift = max_value - min_value
-    ax.plot(x_values-(max_value-min_value), y_values, color = cr, linewidth=2.5)
-    ax.plot(x_values+(max_value-min_value), y_values, color = cr, linewidth=2.5)
+    ax.plot(x_values-(max_value-min_value), y_values, color = cr, linewidth=4)
+    ax.plot(x_values+(max_value-min_value), y_values, color = cr, linewidth=4)
 
     # Connect the -shift graph to the start of the original graph
-    ax.plot([x_values[0], x_values[-1] - shift], [y_values[-1], y_values[0]], color=cr, linewidth=2.5)
+    ax.plot([x_values[0], x_values[-1] - shift], [y_values[-1], y_values[0]], color=cr, linewidth=4)
 
     # Connect the end of the original graph to the +shift graph
-    ax.plot([x_values[-1], x_values[0] + shift], [y_values[-1], y_values[0]], color=cr, linewidth=2.5)
+    ax.plot([x_values[-1], x_values[0] + shift], [y_values[-1], y_values[0]], color=cr, linewidth=4)
 
+    time_period = float(max_value) - float(min_value)
+    plt.xlim(float(min_value) - time_period, float(max_value) + time_period)
     canvas.draw()
     # appearing fourier button
     furrbtn = CTkButton(master = root, text = "Fourier Series", command=fourier_clicked, fg_color=("#de8202", "#de8202") )
