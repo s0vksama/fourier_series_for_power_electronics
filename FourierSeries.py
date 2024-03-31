@@ -11,6 +11,7 @@ from sympy import pi
 
 furrbtn = None
 fig1 = None
+my_frame = None
 
 root = CTk()
 root.geometry("500X400")
